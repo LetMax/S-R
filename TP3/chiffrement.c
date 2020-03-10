@@ -28,10 +28,12 @@ int main(int argc, char* agrv[]){
     char* chiffre = vigenere(claire, cle);
 
     printf("Texte chiffre : %s\n", chiffre);
+
+    return 0;
 }
 
 char* vigenere(char* claire, char* cle){
-    char* chiffre = malloc(sizeof(claire));
+    char* chiffre = malloc(500*sizeof(char));
     strcpy(chiffre, claire);
     int i = 0;
 
@@ -63,7 +65,7 @@ char* substr(char* src, int pos, int len) {
 
 char* simplifier_chaine(char* chaine){
 
-    char* resultat = malloc(strlen(chaine));
+    char* resultat = malloc(500*sizeof(char));
     strcpy(resultat, chaine);
     int i = 0;
     while(resultat[i]){

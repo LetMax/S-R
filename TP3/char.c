@@ -3,18 +3,19 @@
 #include <ctype.h>
 #include <string.h>
 
-char cesar(char clair, char cle){
-    if((clair+cle)%96 > 26){
-        return (char)((clair+cle)%96 + 70);
+char cesar_inverse(char clair, char cle){
+    if((clair-cle) <= 0){
+        return (char)(122 + (clair-cle));
     }
     else{
-        return (char)((clair+cle)%96 + 96);
+        return (char)(clair-cle) + 96;
     }
 }
 
 int main(int argc, char* agrv[]){
 
-    char cle = 'a';
+    char c = 'd';
+    char cle = 'z';
     /*char* s = malloc(50);
     strcpy(s, "texteenclair");
 
@@ -30,5 +31,6 @@ int main(int argc, char* agrv[]){
     printf("Texte non chiffre : %s\n", s);
     printf("Texte chiffre : %s\n", chiffre);*/
 
-    printf("%c\n", cesar('d', cle));
+    char cesar = cesar_inverse(c, cle);
+    printf("%c\n", cesar);
 }
