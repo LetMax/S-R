@@ -1,0 +1,39 @@
+Rapport TP1 sécurité et réseaux | LETERRE Maxime
+
+2.2) Base64 n'est pas du tout un moyen sur de proteger un mo de passe car il est très simple de retrouver le message encodé.
+
+//Partie adduser impossible
+
+4.3) On observe que le fichier chiffré est de même taille que le fichier en clair lorsqu'on dechiffre avec le bon mot de passe mais si le mot de passe est mauvais les tailles sont différentes.
+
+4.5) Avec l'outil xxd, on voit que des données se sont rejoutées à la fin du fichier f1b par rapport à f1 et de même pour f2b et f2. Ces données sont de type "0202" ou "030303"
+
+4.6) On voit que le fichier f3b n'a pas de padding à la fin ce qui veut dire qu'il n'a pas été déchiffré correctement car l'option -nopad laisse obligatoirement une trace à la fin du fichier déchiffré.
+
+5.2) openssl rsa -in mySmall.pem -text -noout
+
+5.3) La clée privée est stockée en clair car on peut y acceder directement sans mot de passe. Cependant, il ne faut pas qu'elle soit stockée en clair.
+
+5.4)
+
+5.5) On aurait pu la casser si on avait pu créer une clée suffisament petite et donc pas assez sécurisée.
+
+5.9) La clée publique permet de chiffrer le message donc il faut la sauvegarder en clair.
+
+5.10) openssl rsa -in mySmall.pem -pubout -out publique
+
+5.11) openssl rsautl -encrypt -in lala -inkey publique -pubin -out chiffre
+openssl rsautl -decrypt -in chiffre -inkey mySmall.pem -out lala2
+
+5.12) Le chiffrement n'est pas possible : "data too large"
+
+5.15) Il faut utiliser la clée privée pour signer le message.
+
+5.16) openssl dgst -md5 -out hache tohache
+openssl rsautl -sign -in hache -inkey mySmall.pem -out signaure
+
+5.17) openssl rsautl -verify -in signaure -pubin -inkey publique -out hache2
+diff hache hache2
+Les fichiers sont identiques.
+
+
