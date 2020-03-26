@@ -3,19 +3,28 @@
 #include <math.h>
 #define TAILLE_NOMBRE 100
 
+//operations (place le resultat dans le premier parametre)
+void modulo(int* a, int* n);
+void exponentiationRapideSansModulo(int* a, int* b);
 void multiplier(int* a, int* b);
+void soustraire(int* a, int* b);
 void ajouter(int* a, int* b);
 void multiplierPar2(int* nombre);
 void reduireDe1(int* nombre);
 void divisePar2(int* nombre);
+
 int estPair(int* nombre);
-int comparer(int* a, int* b); // retourne 0 si a et b sont egaux, sinon 1
+// retourne 0 si a et b sont egaux, sinon 1
+int comparer(int* a, int* b);
+
+//fonctions pratiques
 void libererNombre(int* nombre);
 int* initialiser0();
 int* initialiser1();
 int* decimal_to_binary(int decimal);
 int binary_to_decimal(int* binary);
 void copier_nombre(int* a, int* b); //copie b dans a
+int longueur_nombre(int* a); //nombre de bits d'un nombre sans les 0 inutiles
 void afficher(int* nombre); // n'affiche pas les 0 inutiles
 
 
@@ -48,11 +57,48 @@ int main(int argc, char* agrv[]){
     ajouter(a, b);
     afficher(a);*/
 
-    int* a = decimal_to_binary(57);
-    int* b = decimal_to_binary(85);
-    multiplier(a, b);
+    int* a = decimal_to_binary(123);
+    int* b = decimal_to_binary(13);
+    modulo(a, b);
     afficher(a);
 
+}
+
+void modulo(int* a, int* n){
+    int longueur_a = longueur_nombre(a);
+    int longueur_n = longueur_nombre(n);
+    int dif_longueur = longueur_a - longueur_n;
+    int* k = initialiser0();
+    int* nFOISk = initialiser0();
+
+    while(dif_longueur > 0){
+        //on calcule ce qu'on va retirer à a
+        *(k+TAILLE_NOMBRE-dif_longueur) = 1;
+        copier_nombre(nFOISk, n);
+        multiplier(nFOISk, k);
+        *(k+TAILLE_NOMBRE-dif_longueur) = 0;
+        //on soustrait n * k
+        soustraire(a, nFOISk);
+        //tant que la longueur de a ne diminue pas, on retire n
+        while(longueur_nombre(a) >= longueur_a){
+            soustraire(a, n);
+        }
+        //on actualise les longueurs
+        longueur_a = longueur_nombre(a);
+        dif_longueur = longueur_a - longueur_n;
+    }
+}
+
+void exponentiationRapideSansModulo(int* a, int* b){
+    int* x = initialiser1();
+    int* base = malloc(TAILLE_NOMBRE*sizeof(int));
+    copier_nombre(base, a);
+    int i;
+    for(i = TAILLE_NOMBRE-1; i >= TAILLE_NOMBRE-longueur_nombre(b); i--){
+        if(*(b+i) == 1) multiplier(x, base);
+        multiplier(base, base);
+    }
+    copier_nombre(a, x);
 }
 
 void multiplier(int* a, int* b){
@@ -69,6 +115,29 @@ void multiplier(int* a, int* b){
         }
     }
     copier_nombre(a, result);
+}
+
+void soustraire(int* a, int* b){
+    int i, j;
+    for(i = TAILLE_NOMBRE-1; i >= 0; i--){
+        //cas du 0-1
+        if(*(a+i) - *(b+i) < 0){
+            *(a+i) = 1;
+            //gestion de la retenue
+            j = i - 1;
+            while(*(a+j) == 0){
+                *(a+j) = 1;
+                j--;
+            }
+            if(j < 0){
+                printf("Soustraction impossible !\n");
+                exit(-1);
+            }
+            else *(a+j) = 0;
+        }
+        //operation simple
+        else *(a+i) = *(a+i) - *(b+i);
+    }
 }
 
 void ajouter(int* a, int* b){
@@ -189,6 +258,12 @@ void copier_nombre(int* a, int* b){
     }
 }
 
+int longueur_nombre(int* a){
+    int i = 0;
+    while(i < TAILLE_NOMBRE-1 && *(a+i) == 0) i++;
+    return TAILLE_NOMBRE-i;
+}
+
 void afficher(int* nombre){
     int i = 0;
     while(i < TAILLE_NOMBRE-1 && *(nombre+i) == 0) i++;
@@ -196,5 +271,5 @@ void afficher(int* nombre){
     for(j = i; j<TAILLE_NOMBRE; j++){
         printf("%d", *(nombre+j));
     }
-    printf("\n");
+    printf(" (%d)\n", binary_to_decimal(nombre));
 }
