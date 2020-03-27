@@ -1,14 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #define TAILLE_NOMBRE 100
 
-//operations (place le resultat dans le premier parametre)
-void modulo(int* a, int* n);
-void exponentiationRapideSansModulo(int* a, int* b);
-void multiplier(int* a, int* b);
-void soustraire(int* a, int* b);
-void ajouter(int* a, int* b);
+//operations
+int* nombrePremierMersenne();
+int estPremierAvec(int* a, int* b); //0 si oui, 1 sinon
+int* euclideEtendu(int* a, int* b);
+int* modulo(int* a, int* n);
+int* exponentiationRapideSansModulo(int* a, int* b);
+int* multiplier(int* a, int* b);
+int* soustraire(int* a, int* b);
+int* ajouter(int* a, int* b);
 void multiplierPar2(int* nombre);
 void reduireDe1(int* nombre);
 void divisePar2(int* nombre);
@@ -29,53 +33,97 @@ void afficher(int* nombre); // n'affiche pas les 0 inutiles
 
 
 int main(int argc, char* agrv[]){
-
-    int* a = decimal_to_binary(123);
-    int* b = decimal_to_binary(13);
-    modulo(a, b);
-    afficher(a);
+    srand(time(NULL));
+    printf("Le programme ne gere pas des entiers assez grands pour assurer que les nombres soient premiers de Mersenne\n");
+    for(int i = 0; i < 5; i++){
+        afficher(nombrePremierMersenne());
+    }
     return 0;
 }
 
-void modulo(int* a, int* n){
-    int longueur_a = longueur_nombre(a);
-    int longueur_n = longueur_nombre(n);
-    int dif_longueur = longueur_a - longueur_n;
-    int* k = initialiser0();
-    int* nFOISk = initialiser0();
-
-    while(dif_longueur > 0){
-        //on calcule ce qu'on va retirer à a
-        *(k+TAILLE_NOMBRE-dif_longueur) = 1;
-        copier_nombre(nFOISk, n);
-        multiplier(nFOISk, k);
-        *(k+TAILLE_NOMBRE-dif_longueur) = 0;
-        //on soustrait n * k
-        soustraire(a, nFOISk);
-        //tant que la longueur de a ne diminue pas, on retire n
-        while(longueur_nombre(a) >= longueur_a){
-            soustraire(a, n);
-        }
-        //on actualise les longueurs
-        longueur_a = longueur_nombre(a);
-        dif_longueur = longueur_a - longueur_n;
-    }
+int* nombrePremierMersenne(){
+    int* resultat = initialiser0();
+    int* deux = initialiser1();
+    deux = ajouter(deux, deux);
+    int randomValue;
+    randomValue = rand()%20+2;
+    resultat = soustraire(exponentiationRapideSansModulo(deux,decimal_to_binary(randomValue)),initialiser1());
+    return resultat;
 }
 
-void exponentiationRapideSansModulo(int* a, int* b){
+int estPremierAvec(int* a, int* b){
+    comparer(euclideEtendu(a,b),initialiser1());
+}
+
+int* euclideEtendu(int* a, int* b){
+    int* resultat = initialiser0();
+    int* zero = initialiser0();
+
+    int* copie_a = initialiser0();
+    copier_nombre(copie_a, a);
+
+    int* copie_b = initialiser0();
+    copier_nombre(copie_b, b);
+
+    int* reste = modulo(copie_a, copie_b);
+
+    while(comparer(reste, zero) == 1){
+        afficher(reste);
+
+        copier_nombre(resultat, reste);
+        copier_nombre(copie_a, copie_b);
+        copier_nombre(copie_b, reste);
+        reste = modulo(copie_a, copie_b);
+    }
+    return resultat;
+}
+
+int* modulo(int* a, int* n){
+    int quotient = 0;
+    int* k = initialiser0();
+    int* nFOISk = initialiser0();
+    int* resultat = initialiser0();
+    copier_nombre(resultat, a);
+
+    int longueur_resultat = longueur_nombre(resultat);
+    int longueur_n = longueur_nombre(n);
+    int dif_longueur = longueur_resultat - longueur_n;
+
+    while(binary_to_decimal(resultat) > binary_to_decimal(n)){
+        //on calcule ce qu'on va retirer au resultat
+        *(k+TAILLE_NOMBRE-dif_longueur) = 1;
+        quotient += binary_to_decimal(k);
+        nFOISk = multiplier(n, k);
+        *(k+TAILLE_NOMBRE-dif_longueur) = 0;
+        //on soustrait n * k
+        resultat = soustraire(resultat, nFOISk);
+        //tant que la longueur du resultat ne diminue pas, on retire n
+        while(longueur_nombre(resultat) >= longueur_resultat || binary_to_decimal(resultat) >= binary_to_decimal(n)){
+            resultat = soustraire(resultat, n);
+            quotient++;
+        }
+        //on actualise les longueurs
+        longueur_resultat = longueur_nombre(resultat);
+        dif_longueur = longueur_resultat - longueur_n;
+    }
+    printf("Quotient euclidien de %d/%d = %d\n", binary_to_decimal(a), binary_to_decimal(n), quotient);
+    return resultat;
+}
+
+int* exponentiationRapideSansModulo(int* a, int* b){
     int* x = initialiser1();
     int* base = malloc(TAILLE_NOMBRE*sizeof(int));
     copier_nombre(base, a);
     int i;
     for(i = TAILLE_NOMBRE-1; i >= TAILLE_NOMBRE-longueur_nombre(b); i--){
-        if(*(b+i) == 1) multiplier(x, base);
-        multiplier(base, base);
+        if(*(b+i) == 1) x = multiplier(x, base);
+        base = multiplier(base, base);
     }
-    copier_nombre(a, x);
+    return x;
 }
 
-void multiplier(int* a, int* b){
-    int* result = initialiser0();
+int* multiplier(int* a, int* b){
+    int* resultat = initialiser0();
     int* tmp = malloc(TAILLE_NOMBRE*sizeof(int));
     copier_nombre(tmp, b);
 
@@ -84,57 +132,63 @@ void multiplier(int* a, int* b){
         if(*(a+i) == 1){
             copier_nombre(tmp, b);
             for(j = 0; j < TAILLE_NOMBRE-1-i; j++) multiplierPar2(tmp); //decalage
-            ajouter(result, tmp);
+            resultat = ajouter(resultat, tmp);
         }
     }
-    copier_nombre(a, result);
+    return resultat;
 }
 
-void soustraire(int* a, int* b){
+int* soustraire(int* a, int* b){
+    int* resultat = initialiser0();
+    copier_nombre(resultat, a);
     int i, j;
     for(i = TAILLE_NOMBRE-1; i >= 0; i--){
         //cas du 0-1
-        if(*(a+i) - *(b+i) < 0){
-            *(a+i) = 1;
+        if(*(resultat+i) - *(b+i) < 0){
+            *(resultat+i) = 1;
             //gestion de la retenue
             j = i - 1;
-            while(*(a+j) == 0){
-                *(a+j) = 1;
+            while(*(resultat+j) == 0){
+                *(resultat+j) = 1;
                 j--;
             }
             if(j < 0){
                 printf("Soustraction impossible !\n");
                 exit(-1);
             }
-            else *(a+j) = 0;
+            else *(resultat+j) = 0;
         }
         //operation simple
-        else *(a+i) = *(a+i) - *(b+i);
+        else *(resultat+i) = *(resultat+i) - *(b+i);
     }
+    return resultat;
 }
 
-void ajouter(int* a, int* b){
+int* ajouter(int* a, int* b){
+    int* resultat = initialiser0();
+    copier_nombre(resultat, a);
     int retenue = 0;
     int i, tmp;
     for(i = TAILLE_NOMBRE-1; i >= 0; i--){
-        tmp = *(a+i) + *(b+i) + retenue;
+        tmp = *(resultat+i) + *(b+i) + retenue;
         if(i == 0 && tmp >= 2){
             printf("La somme est trop grande !\n");
             exit(-1);
         }
         if(tmp == 3){
-            *(a+i) = 1;
+            *(resultat+i) = 1;
             retenue = 1;
         }
         else if(tmp == 2){
-            *(a+i) = 0;
+            *(resultat+i) = 0;
             retenue = 1;
         }
         else{
-            *(a+i) = tmp;
+            *(resultat+i) = tmp;
             retenue = 0;
         }
     }
+    return resultat;
 }
 
 void multiplierPar2(int* nombre){
