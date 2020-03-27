@@ -29,39 +29,12 @@ void afficher(int* nombre); // n'affiche pas les 0 inutiles
 
 
 int main(int argc, char* agrv[]){
-    /*int* un = initialiser1();
-    int* zero = initialiser0();
-    afficher(un);
-    afficher(zero);
-    if(comparer(un, zero) == 0){
-        printf("Ils sont egaux\n");
-    }
-    if(estPair(zero)){
-        printf("Le nombre est pair\n");
-    }*/
-
-    /*int* cinq = decimal_to_binary(5);
-    afficher(cinq);
-    reduireDe1(cinq);
-    afficher(cinq);
-    reduireDe1(cinq);
-    afficher(cinq);*/
-
-    /*int* sept = decimal_to_binary(7);
-    afficher(sept);
-    multiplierPar2(sept);
-    afficher(sept);*/
-
-    /*int* a = decimal_to_binary(3);
-    int* b = decimal_to_binary(1);
-    ajouter(a, b);
-    afficher(a);*/
 
     int* a = decimal_to_binary(123);
     int* b = decimal_to_binary(13);
     modulo(a, b);
     afficher(a);
-
+    return 0;
 }
 
 void modulo(int* a, int* n){
